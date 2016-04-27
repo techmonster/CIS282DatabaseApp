@@ -18,10 +18,16 @@ import java.util.ArrayList;
 public class DBHelper {
 
     public void connect() {
-        new myTask().execute();
+        new MyTask().execute();
     }
 
-    private class myTask extends AsyncTask<Void, Void, Void> {
+    public class MyTask extends AsyncTask<Void, Void, Void> {
+        public AsyncResponse delegate = null;
+
+       // @Override
+        protected void onPostExecute(String result){
+            delegate.processFinish(result);
+        }
         @Override
         protected Void doInBackground(Void... voids) {
 
