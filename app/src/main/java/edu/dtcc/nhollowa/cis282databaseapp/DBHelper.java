@@ -1,6 +1,7 @@
 package edu.dtcc.nhollowa.cis282databaseapp;
 
 import android.os.AsyncTask;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.sql.Connection;
@@ -16,20 +17,25 @@ import java.util.ArrayList;
  * Created by anndroid on 4/25/16.
  */
 public class DBHelper {
+    private ArrayList<String> currentResult;
 
-    public void connect() {
-        new MyTask().execute();
+    public void connect(String tableName) {
+        new MyTask().execute(tableName);
     }
 
-    public class MyTask extends AsyncTask<Void, Void, Void> {
-        public AsyncResponse delegate = null;
+    public ArrayList<String> getCurrentResult() {
+        return currentResult;
+    }
 
-       // @Override
-        protected void onPostExecute(String result){
-            delegate.processFinish(result);
-        }
-        @Override
-        protected Void doInBackground(Void... voids) {
+    public void setCurrentResult(ArrayList<String> newResult) {
+        currentResult = newResult;
+    }
+
+    public class MyTask extends AsyncTask<String, Void, ArrayList<String>> {
+        //public AsyncResponse delegate = null;
+
+
+        protected ArrayList<String> doInBackground(String... tableName) {
 
             String url = "jdbc:mysql://phpmyadmin.cdgwdgkn5fuv.us-west-2.rds.amazonaws.com:3306/cis282_project";
             String user = "manager";
@@ -51,6 +57,10 @@ public class DBHelper {
                 System.out.println("Connection Succeeded :)");
             } catch (SQLException e) {
                 System.out.println("Connection Failed :(");
+                e.printStackTrace();
+
+
+
                 // e.printStackTrace();
             }
 
@@ -59,10 +69,33 @@ public class DBHelper {
                 if (connection != null) {
                     st = connection.createStatement();
                 }
-                String sql1 = "SELECT * FROM PROJECT";
-                String sql2 = "SELECT * FROM EMPLOYEE";
-                String sql3 = "SELECT * FROM TASK";
-                String sql4 = "SELECT * FROM TASK_EMPLOYEE";
+                String query;
+
+                String tempName = tableName[0].toLowerCase();
+
+                switch (tempName)
+                {
+                    case "project":
+                        query = "SELECT * FROM PROJECT";
+                        break;
+                    case "employee":
+                        query = "SELECT * FROM EMPLOYEE";
+                        break;
+                    case "task":
+                        query = "SELECT * FROM TASK";
+                        break;
+                    case "task_employee":
+                        query = "SELECT * FROM TASK_EMPLOYEE";
+                        break;
+                    default:
+                        query = "SELECT * FROM PROJECT";
+                        break;
+
+                }
+                //String sql1 = "SELECT * FROM PROJECT";
+                //String sql2 = "SELECT * FROM EMPLOYEE";
+                //String sql3 = "SELECT * FROM TASK";
+                //String sql4 = "SELECT * FROM TASK_EMPLOYEE";
 
 
                 String result = "";
@@ -70,17 +103,18 @@ public class DBHelper {
                 ArrayList<String> returnedData = new ArrayList<>();
                 final ResultSet rs;
                 if (st != null) {
-                    rs = st.executeQuery(sql2);
+                    rs = st.executeQuery(query);
 
-                    returnedData = populateData(rs);
+                    returnedData = populateData(rs, tempName);
 
-                    for (String s : returnedData) {
+                    /*for (String s : returnedData) {
                         result += s;
-                    }
+                    }*/
 
 
                 }
-                System.out.print(result);
+                 //System.out.print(result);
+                return returnedData;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -88,24 +122,71 @@ public class DBHelper {
             return null;
         }
 
-        public ArrayList<String> populateData(ResultSet set){
+        protected void onPostExecute(ArrayList<String> result){
+            //delegate.processFinish(result);
+            setCurrentResult(result);
+        }
 
-            String result;
+        public ArrayList<String> populateData(ResultSet set, String tableName){
+
             ArrayList<String> data = new ArrayList<>();
             try{
-                while (set.next()) {
-                    result = null;
-                    result += set.getInt(1) + "\t";
-                    //result += rsmd.getColumnName(2) + ":" + set.getInt(2) + "\n";
-                    result += set.getString(2) + "\t";
-                    result += set.getString(3) + "\n";
+                if(tableName.equals("project")) {
+                    while (set.next()) {
+                        String result = set.getInt(1) + "\t";
+                        //result += rsmd.getColumnName(2) + ":" + set.getInt(2) + "\n";
+                        result += set.getString(2) + "\t";
+                        result += set.getString(3) + "\t";
+                        result += set.getInt(4) + "\n";
 
-                    data.add(result);
+                        // result = set.getString(1);
+                        data.add(result);
+                    }
+                    return data;
+                }
+                if(tableName.equals("employee")) {
+                    while (set.next()) {
+                        String result = set.getInt(1) + "\t";
+                        //result += rsmd.getColumnName(2) + ":" + set.getInt(2) + "\n";
+                        result += set.getString(2) + "\t";
+                        result += set.getString(3) + "\n";
+
+                        // result = set.getString(1);
+                        data.add(result);
+                    }
+                    return data;
+                }
+                if(tableName.equals("task")) {
+                    while (set.next()) {
+                        String result = set.getInt(1) + "\t";
+                        //result += rsmd.getColumnName(2) + ":" + set.getInt(2) + "\n";
+                        result += set.getInt(2) + "\t";
+                        result += set.getString(3) + "\t";
+                        result += set.getString(4) + "\t";
+                        result += set.getInt(5) + "\n";
+
+                        // result = set.getString(1);
+                        data.add(result);
+                    }
+                    return data;
+                }
+                if(tableName.equals("task_employee")) {
+                    while (set.next()) {
+                        String result = set.getInt(1) + "\t";
+                        //result += rsmd.getColumnName(2) + ":" + set.getInt(2) + "\n";
+                        result += set.getInt(2) + "\n";
+                        ;
+
+                        // result = set.getString(1);
+                        data.add(result);
+                    }
+                    return data;
                 }
 
             } catch (Exception e){
                 System.out.println(e);
             }
+
             return data;
 
         }
