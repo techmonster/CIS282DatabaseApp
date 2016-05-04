@@ -17,22 +17,15 @@ import java.util.ArrayList;
  * Created by anndroid on 4/25/16.
  */
 public class DBHelper {
-    private ArrayList<String> currentResult;
+    public AsyncResponse delegate = null;
 
     public void connect(String tableName) {
         new MyTask().execute(tableName);
     }
 
-    public ArrayList<String> getCurrentResult() {
-        return currentResult;
-    }
-
-    public void setCurrentResult(ArrayList<String> newResult) {
-        currentResult = newResult;
-    }
 
     public class MyTask extends AsyncTask<String, Void, ArrayList<String>> {
-        //public AsyncResponse delegate = null;
+
 
 
         protected ArrayList<String> doInBackground(String... tableName) {
@@ -63,6 +56,8 @@ public class DBHelper {
 
                 // e.printStackTrace();
             }
+
+            ArrayList<String> returnedData = new ArrayList<>();
 
             try {
                 Statement st = null;
@@ -98,38 +93,35 @@ public class DBHelper {
                 //String sql4 = "SELECT * FROM TASK_EMPLOYEE";
 
 
-                String result = "";
+                //String result = "";
 
-                ArrayList<String> returnedData = new ArrayList<>();
+
                 final ResultSet rs;
                 if (st != null) {
                     rs = st.executeQuery(query);
 
-                    returnedData = populateData(rs, tempName);
+                    populateData(rs, tempName, returnedData);
 
                     /*for (String s : returnedData) {
                         result += s;
                     }*/
 
-
                 }
                  //System.out.print(result);
-                return returnedData;
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
-            return null;
+            return returnedData;
         }
 
         protected void onPostExecute(ArrayList<String> result){
-            //delegate.processFinish(result);
-            setCurrentResult(result);
+            delegate.processFinish(result);
         }
 
-        public ArrayList<String> populateData(ResultSet set, String tableName){
+        public void populateData(ResultSet set, String tableName, ArrayList<String> data){
 
-            ArrayList<String> data = new ArrayList<>();
+            //ArrayList<String> data = new ArrayList<>();
             try{
                 if(tableName.equals("project")) {
                     while (set.next()) {
@@ -142,7 +134,6 @@ public class DBHelper {
                         // result = set.getString(1);
                         data.add(result);
                     }
-                    return data;
                 }
                 if(tableName.equals("employee")) {
                     while (set.next()) {
@@ -154,7 +145,6 @@ public class DBHelper {
                         // result = set.getString(1);
                         data.add(result);
                     }
-                    return data;
                 }
                 if(tableName.equals("task")) {
                     while (set.next()) {
@@ -168,26 +158,22 @@ public class DBHelper {
                         // result = set.getString(1);
                         data.add(result);
                     }
-                    return data;
                 }
                 if(tableName.equals("task_employee")) {
                     while (set.next()) {
                         String result = set.getInt(1) + "\t";
                         //result += rsmd.getColumnName(2) + ":" + set.getInt(2) + "\n";
                         result += set.getInt(2) + "\n";
-                        ;
+
 
                         // result = set.getString(1);
                         data.add(result);
                     }
-                    return data;
                 }
 
             } catch (Exception e){
                 System.out.println(e);
             }
-
-            return data;
 
         }
     }

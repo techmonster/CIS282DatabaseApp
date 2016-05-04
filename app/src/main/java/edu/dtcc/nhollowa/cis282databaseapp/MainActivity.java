@@ -1,21 +1,11 @@
 package edu.dtcc.nhollowa.cis282databaseapp;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity implements AsyncResponse{
 
    // DBHelper.MyTask asyncTask = new DBHelper.MyTask();
 
@@ -29,16 +19,22 @@ public class MainActivity extends AppCompatActivity  {
 
 
         DBHelper helper = new DBHelper();
-        helper.connect("task");
-        System.out.println(helper.getCurrentResult());
+        helper.delegate = this;
+        helper.connect("employee");
+
+
+        /*for(int i = 0; i < test.size(); i++) {
+            System.out.print(test.get(i));
+        }*/
 
     }
 
 
-    /*void processFinish(String output){
-        //Here you will receive the result fired from async class
-        //of onPostExecute(result) method.
-    }*/
+    public void processFinish(ArrayList<String> output){
+        for(int i = 0; i < output.size(); i++) {
+            System.out.print(output.get(i));
+        }
+    }
 
 
 
